@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Lab.Utility;
+using Lab.Model.Exceptions;
 
 namespace Lab.ViewModel
 {
@@ -101,35 +102,26 @@ namespace Lab.ViewModel
 
 		private void ShowPersonInfo()
 		{
-			int age = DateTime.Today.Year - DateOfBirth.Year;
-			if (DateOfBirth > DateTime.Today.AddYears(-age)) age--;
-
-			if (DateOfBirth > DateTime.Today || age > 135)
+			try
 			{
-				MessageBox.Show("Невірна дата народження. Людина ще не народилась або їй більше ніж 135 років.");
-				return;
+				var person = new Person(Name, SecondName, Email, DateOfBirth);
+
+				string info = $"Name: {person.Name}\n" +
+							  $"Second Name: {person.SecondName}\n" +
+							  $"Email: {person.Email}\n" +
+							  $"Date of Birth: {person.DateOfBirth.ToShortDateString()}\n" +
+							  $"IsAdult: {person.IsAdult}\n" +
+							  $"SunSign: {person.SunSign}\n" +
+							  $"ChineseSign: {person.ChineseSign}\n" +
+							  $"IsBirthday: {person.IsBirthday}";
+
+				MessageBox.Show(info, "Person Info");
+			}
+			catch (PersonValidationException ex) 
+			{
+				MessageBox.Show(ex.Message, "Exception");
 			}
 
-			// Перевірка на день народження
-			if (DateOfBirth.Day == DateTime.Today.Day &&
-				DateOfBirth.Month == DateTime.Today.Month)
-			{
-				MessageBox.Show("З Днем Народження! 🎉");
-			}
-
-			// Створити об’єкт Person і показати всі 8 полів
-			var person = new Person(Name, SecondName, Email, DateOfBirth);
-
-			string info = $"Name: {person.Name}\n" +
-						  $"Second Name: {person.SecondName}\n" +
-						  $"Email: {person.Email}\n" +
-						  $"Date of Birth: {person.DateOfBirth.ToShortDateString()}\n" +
-						  $"IsAdult: {person.IsAdult}\n" +
-						  $"SunSign: {person.SunSign}\n" +
-						  $"ChineseSign: {person.ChineseSign}\n" +
-						  $"IsBirthday: {person.IsBirthday}";
-
-			MessageBox.Show(info, "Person Info");
 		}
 	}
 }

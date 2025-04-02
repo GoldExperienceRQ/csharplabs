@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-
+using Lab.Model.Exceptions;
 namespace Lab.Model
 {
 	public class Person
@@ -25,17 +25,23 @@ namespace Lab.Model
 		public string ChineseSign => _chineseSign;
 		public bool IsBirthday => _isBirthday;
 
+
 		public Person(string name, string secondName, string email, DateTime dateOfBirth)
 		{
-			Name = name;
-			SecondName = secondName;
-			Email = email;
-			DateOfBirth = dateOfBirth;
+			
+				ValidateInputs(email, dateOfBirth);
 
-			_isAdult = CalculateIsAdult();
-			_sunSign = CalculateSunSign();
-			_chineseSign = CalculateChineseSign();
-			_isBirthday = CalculateIsBirthday();
+				Name = name;
+				SecondName = secondName;
+				Email = email;
+				DateOfBirth = dateOfBirth;
+
+				_isAdult = CalculateIsAdult();
+				_sunSign = CalculateSunSign();
+				_chineseSign = CalculateChineseSign();
+				_isBirthday = CalculateIsBirthday();
+
+			
 		}
 		public Person(string name, string secondName, DateTime dateOfBirth)
 		{
@@ -51,6 +57,39 @@ namespace Lab.Model
 			Email = email;
 			DateOfBirth = DateTime.Now;
 		}
+
+		private void ValidateInputs(string email, DateTime dateOfBirth)
+		{
+			if (!IsValidEmail(email))
+				throw new IncorrectEmailException();
+
+			var today = DateTime.Today;
+			int age = today.Year - dateOfBirth.Year;
+			if (dateOfBirth > today.AddYears(-age)) age--;
+
+			if (dateOfBirth > today)
+				throw new FutureDateOfBirthException();
+
+			if (age > 135)
+				throw new PersonIsTooOldException();
+		}
+		private bool IsValidEmail(string email)
+		{
+			if (string.IsNullOrWhiteSpace(email))
+				return false;
+
+			try
+			{
+				// Use built-in .NET email validator
+				var addr = new System.Net.Mail.MailAddress(email);
+				return addr.Address == email;
+			}
+			catch
+			{
+				return false;
+			}
+		}
+
 		private bool CalculateIsAdult()
 		{
 			if (DateOfBirth == default) return false;
